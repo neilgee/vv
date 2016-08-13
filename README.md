@@ -1,7 +1,7 @@
 # Variable VVV - The Best VVV Site Wizard
 
 	 ██    ██ ██    ██
-	░██   ░██░██   ░██     Variable VVV 1.9.3
+	░██   ░██░██   ░██     Variable VVV 1.10.2
 	░░██ ░██ ░░██ ░██
 	 ░░████   ░░████       The easiest way to set up
 	  ░░██     ░░██        WordPress sites with VVV!
@@ -10,9 +10,38 @@
 
 `vv` makes it extremely easy to create a new WordPress site using [Varying Vagrant Vagrants](https://github.com/Varying-Vagrant-Vagrants/VVV). `vv` supports site creation with many different options; site blueprints to set up all your plugins, themes, and more; deployments; and lots more features.
 
-[![Travis](https://img.shields.io/travis/bradp/vv.svg)]()
+[![Travis](https://img.shields.io/travis/bradp/vv.svg)](https://travis-ci.org/bradp/vv)
 
-*Tired of the time it takes to do a `vagrant provision` or create new sites?* Check out [flip](https://github.com/bradp/vvv-provision-flipper), a simple utility I built to solve that issue.
+*Tired of the time it takes to do a `vagrant provision` or create new sites?* Check out [flip](https://github.com/bradp/vvv-provision-flipper), a simple utility to solve that issue.
+
+# Table of Contents
+
+- [Installation](#installation)
+  - [OS X Installation](#os-x-installation)
+  - [Windows Installation](#windows-installation)
+  - [Linux Installation](#linux-installation)
+- [Adding tab-completion to vv](#adding-tab-completion-to-vv)
+- [Updating](#updating)
+- [Usage](#usage)
+- [Site Creation](#site-creation)
+  - [Subdomain Multisite Installation](#subdomain-multisite-installation)
+- [Site Deletion](#site-deletion)
+- [Deployments](#deployments)
+- [Advanced Usage](#advanced-usage)
+  - [Airplane Mode](#airplane-mode)
+  - [Flags](#flags)
+- [Blueprints](#blueprints)
+  - [Blueprints for Multisite configurations](#blueprints-for-multisite-configurations)
+  - [Blueprints for Multi-Network configurations](#blueprints-for-multi-network-configurations)
+- [Vagrant Proxy](#vagrant-proxy)
+- [vv Options](#vv-options)
+  - [Commands](#commands)
+  - [Options for Site Creation](#options-for-site-creation)
+  - [Options for Site Removal](#options-for-site-removal)
+  - [Options for Deployment Setup](#options-for-deployment-setup)
+- [.vv-config](#vv-config)
+- [vv Hooks](#vv-hooks)
+- [Thanks](#thanks)
 
 ## Installation
 
@@ -22,7 +51,11 @@ If you have [Homebrew](http://brew.sh/) installed, you run the following in your
 
 	$ brew install bradp/vv/vv
 
-Otherwise you'll want to clone and edit your `$PATH` to include the vv core file.
+Otherwise, clone this repositoy and edit your `$PATH` to include the `vv` core file:
+
+1. Clone this repo: `git clone https://github.com/bradp/vv.git`
+1. Add the `vv` core script to your shell's `$PATH`:
+    * If you're using `bash`: ``touch ~/.bash_profile && echo "export PATH=\$PATH:`pwd`/vv" >> ~/.bash_profile``
 
 ### Windows Installation
 
@@ -43,6 +76,20 @@ Otherwise you'll want to clone and edit your `$PATH` to include the vv core file
 Alternately, you can use cmd.exe with `bash vv`.
 
 Props to [Vinsanity](https://github.com/Vinsanity) for these instructions. If you're having issues, please see [this issue](https://github.com/bradp/vv/issues/33).
+
+### Linux Installation
+
+* Clone vv into a folder.
+
+    `$ git clone https://github.com/bradp/vv.git`
+
+* Access the directory that you cloned vv into.
+
+* Copy the vv executable to /usr/local/bin
+
+    `$ sudo cp vv /usr/local/bin`
+
+* You should now be able to easily run vv from anywhere in your system.
 
 ## Adding tab-completion to `vv`
 
@@ -74,7 +121,7 @@ The main commands are `list`, `create`, `delete`. These will list your sites, cr
 
 To start creating a site, simply do `vv create` ( you can also do `vv --create`, or simply `vv -c`). You will then be prompted for all required options.
 
-All options and flags are [listed below](#options).
+All options and flags are [listed below](#vv-options).
 
 ## Site Creation
 
@@ -95,11 +142,15 @@ Provisioning Vagrant takes a couple of minutes, but this is a crucial step as it
 ### Subdomain Multisite Installation
 
 If you are using a subdomain multisite, you must edit vvv-hosts file inside of that site's folder with each subdomain on a new line. For example:
-    mysite.dev
-    siteA.mysite.dev
-    siteB.mysite.dev
 
-After this, run `vagrant halt; vagrant up --provision` and your subdomains should resolve. *Please note*, any sites set up prior to version 1.7.3 will need more configuration for this, either remove and re-set up the site or [ping me on Twitter](http://twitter.com/bradparbs) for help.
+ > mysite.dev
+
+ > siteA.mysite.dev
+
+ > siteB.mysite.dev
+
+
+After this, run `vagrant reload --provision` and your subdomains should resolve. *Please note*, any sites set up prior to version 1.7.3 will need more configuration for this, either delete and re-set up the site or [ping me on Twitter](http://twitter.com/bradparbs) for help.
 
 ## Site Deletion
 
@@ -127,6 +178,11 @@ When removing a deployment, your current Vagrantfile will be backed up as Vagran
 
 ## Advanced Usage
 
+### Airplane Mode
+
+Using `x` as the first argument with `vv` will force airplane mode. This will cut off update checks on usage. This is useful if you're using `vv` without an internet connection. The provision state of VVV will probably fail at some point, though.
+
+### Flags
 Anything that vv prompts you for, you can pass in as an argument. Most of this is realized in the site creation. In fact, there are a few arguments you can pass in that aren't prompted. This gives you total control over creating a new site.
 
 To create a new site named 'mysite' that has the domain 'mysite.dev' and is a multisite with subdomains, with `WP_Debug` turned on would be:
@@ -141,9 +197,9 @@ To use a custom database prefix, simply use the `vv create --prefix myprefix` wh
 
 ## Blueprints
 
-Blueprints allow you to set up different plugins, themes, mu-plugins, options, or constants that will be installed to a new site you create. First, run `vv --blueprint-init` to have vv create a `vv-blueprints.json` file in your VVV directory. You can edit this file to create and set up different blueprints.
+Blueprints allow you to set up different plugins, themes, mu-plugins, options, widgets, menus, or constants that will be installed to a new site you create. First, run `vv --blueprint-init` to have vv create a `vv-blueprints.json` file in your VVV directory. You can edit this file to create and set up different blueprints.
 
-The blueprint should look like this:
+A simple blueprint should look like this:
 ```json
 {
   "sample": {
@@ -172,10 +228,63 @@ The blueprint should look like this:
         "force": false,
         "activate": true,
         "activate_network": false
-      },
+      }
     ],
     "options": [
       "current_theme::_s"
+    ],
+    "widgets": [
+      {
+        "name": "meta",
+        "location": "sidebar-1",
+        "position": 1,
+        "options": {
+          "title": "Site login or logout"
+        }
+      },
+      {
+        "name": "text",
+        "location": "sidebar-2",
+        "position": 4,
+        "options": {
+          "title": "Hello world.",
+          "text": "I'm a new widget."
+        }
+      }
+    ],
+    "menus": [
+      {
+        "name": "Example Menu",
+        "locations": [
+          "primary",
+          "social"
+        ],
+        "items": [
+          {
+            "type": "post",
+            "post_id": 2,
+            "options": {
+              "title": "Read the 'Sample Post'"
+            }
+          },
+          {
+            "type": "custom",
+            "title": "Our Partner Site",
+            "link": "//example.com/",
+            "options": {
+              "description": "Check out our partner's awesome website."
+            }
+          },
+          {
+            "type": "term",
+            "taxonomy": "category",
+            "term_id": 1,
+            "options": {
+              "title": "Example category"
+            }
+          }
+        ]
+      }
     ],
     "demo_content": [
       "link::https://raw.githubusercontent.com/manovotny/wptest/master/wptest.xml"
@@ -195,17 +304,165 @@ For themes, plugins, and mu-plugins, you can use:
 * Url to zip file
 * WordPress.org slug
 
-The options for plugins and themes correspond to the equivalent [WP CLI](http://wp-cli.org) option.
+The options for plugins, themes, widgets, and menus correspond to the equivalent [WP CLI](http://wp-cli.org) option.
 
 For options, demo content, and constants, please note the `::` as a separator between the key and value.
 
 Custom demo content can be imported through the blueprint. Be sure to use a link that points to just the xml code, like [this](https://raw.githubusercontent.com/manovotny/wptest/master/wptest.xml). You can add as many demo content files as you'd like, just separate each line with a comma as usual.
+
+A multisite's Network Settings can be configured using a `network_options` array in the blueprint.
 
 You can create as many named blueprints in this file as you would like, all with as many different settings as you'd like.
 
 When creating a site, the name you've specified (in this example, "sample") is what you'll need to specify to use this blueprint.
 
 You can use 'SITENAME' or 'SITEDOMAIN' anywhere in the blueprint, and that will be replaced with the actual site name or local domain when installing.
+
+### Blueprints for Multisite configurations
+
+Blueprints also let you set up individual subsites in a Multisite network. For example, you can define a blueprint for a multisite network in which certain plugins or themes are activated across the whole network, or just for specific subsites.
+
+To add multisite support to your blueprint, add a `sites` key to a specific blueprint, like this:
+
+```json
+"sites": {
+  "site2": {
+    "plugins": [
+      "...(same as above)..."
+    ]
+  }
+}
+```
+
+The `sites` object holds a subsite definition, which has the same capabilities as a regular site's blueprint (so `plugins`, `themes`, etc. are all the same), and also includes keys for [WP-CLI's `wp site create` command](http://wp-cli.org/commands/site/create/). For example, to create a subsite whose slug is `subsite2`, titled "Second Subsite" with an admin email address of `subsite2admin@localhost.dev` with `robots.txt` exclusions, use:
+
+```json
+"sites": {
+  "subsite2": {
+    "title": "Second Subsite",
+    "email": "subsite2admin@localhost.dev"
+  }
+}
+```
+
+If your multisite network uses subdomains, you can include a blueprint-level key named like `BLUEPRINT_NAME::subdomains` to have `vv` configure your subdomains for you. `BLUEPRINT_NAME` should match the name of your blueprint, and the value should be a space-separated list of subdomains that match your subsite slugs. A complete example for the `sample` blueprint shown above using subdomain-based multisite configurations might look like this:
+
+```json
+{
+  "sample": {
+    "sample::subdomains": "site2 site3",
+    "sites": {
+      "site2": {
+        "title": "Child Site (subsite2)",
+        "plugins": [
+          {
+            "location": "buddypress",
+            "activate": true
+          }
+        ]
+      },
+      "site3": {
+        "title": "Private Child Site",
+        "private": true,
+        "email": "site2admin@local.dev",
+        "themes": [
+          {
+            "location": "https://github.com/glocalcoop/anp-network-main-child/archive/master.zip",
+            "activate": true
+          }
+        ]
+      }
+    },
+    "themes": [
+      {
+        "location": "automattic/_s",
+        "enable_network": true
+      },
+      {
+        "location": "glocalcoop/anp-network-main-v2",
+        "activate": true
+      }
+    ],
+    "mu_plugins": [
+      {
+        "location": "https://github.com/WebDevStudios/WDS-Required-Plugins.git"
+      }
+    ],
+    "plugins": [
+      {
+        "location": "https://github.com/clef/wordpress/archive/master.zip",
+        "version": null,
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "cmb2",
+        "version": "2.0.5",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+    ],
+    "demo_content": [
+      "link::https://raw.githubusercontent.com/manovotny/wptest/master/wptest.xml"
+    ],
+    "defines": [
+      "WP_CACHE::false"
+    ]
+  }
+}
+```
+
+The above installs [BuddyPress](https://buddypress.org/) but activates it only for `site2`, enables the `_s` theme for the entire network but activates `anp-network-main-v2` for the network's main site and `anp-network-main-child` for `site3`, which is also given its own site admin user.
+
+Be sure to run `vv` with the `--multisite subdomain` option when you use a blueprint like this.
+
+### Blueprints for Multi-Network configurations
+
+In addition to a [multisite configuration](#blueprints-for-multisite-configurations), VV recognizes blueprints that will configure a WP Multi-Network (a network of WP Multisite networks). VV's Multi-Network blueprints work just like Multisite blueprints, but have the following required additions:
+
+* A `BLUEPRINT_NAME::subnetwork_domains` key must be present listing the root domains for each network.
+* A `networks` object must be present, whose keys match the domains listed in the `BLUEPRINT_NAME::subnetwork_domains` member.
+
+For example, this Multi-Network configuration defines two WP Multisite subnetworks (for a total of three WP Multisites) in the blueprint called `multinet`.
+
+```json
+{
+  "multinet": {
+    "multinet::subdomains": "site2 site3",
+    "multinet::subnetwork_domains": "wpsubnet1.dev wpsubnet2.dev",
+    "networks": {
+      "wpsubnet1.dev": {
+        "path": "/",
+        "site_name": "WP Subnetwork Example 1"
+      },
+      "wpsubnet2.dev": {
+        "path": "/",
+        "site_name": "WP Subnetwork Example 2"
+      }
+    }
+  }
+}
+```
+
+Note that empty network objects are allowed (i.e., `path` and `site_name` are optional), but not recommended.
+
+To associate a given subsite with a network, you can either use the `network_id` key or a `network_domain` key in the subsite object. A `network_domain` is recommended. For example, this object will associate the `site2` subsite with the main network (because no `network_domain` or `network_id` key is defined), and the subsite with slug `site3` with the network created at the given domain:
+
+```json
+{
+  "site2": {
+  },
+  "site3": {
+    "network_domain": "wpsubnet1.dev"
+  }
+}
+```
+
+The above will ultimately place `site3` at the `site3.wpsubnet1.dev` URL while `site2` will be created as a subdomain of whatever domain you chose when you invoked `vv create`.
+
+It is not an error for a WP network to be defined with no sites of its own.
 
 ## Vagrant Proxy
 
@@ -231,7 +488,7 @@ Because vv knows where you VVV installation is, you can run it from anywhere. vv
 |-------|-----------|
 |`list`, `--list`,  `-l`|List all VVV sites|
 |`create`, `--create`, `-c`|Create a new site|
-|`remove`, `--remove`, `-r`|Remove a site|
+|`delete`, `--delete`, `-r`|Delete a site|
 |`deployment-create`, `--deployment-create`|Set up deployment for a site|
 |`deployment-remove`, `--deployment-remove`|Remove deployment for a site|
 |`deployment-config`, `--deployment-config`|Manually edit deployment configuration|
@@ -293,6 +550,8 @@ Because vv knows where you VVV installation is, you can run it from anywhere. vv
 
 The first time you run `vv`, it will attempt to locate your VVV installation location. If it can't find it, you will be prompted for it. This will be written to a .vv-config file in your home directory. (`~/.vv-config`) You can also edit this file if you need to change your VVV path.
 
+Also, if `vv` detects a `.vv-config` file in your current directory, this local file will override the one in your home directory. A use case would be to have several different `VVV` installations, that each contain their own local `.vv-config` file. Provided that you enter the appropriate directory before sending commands to `vv`, this effectively allows you to manage several different installations through one user account.
+
 You can also add `"auto_update_disable": false` to this file to disable auto-update functionality.
 
 
@@ -314,18 +573,17 @@ For example, saving this file as the name of any hook will output 'Hello' when t
 ```
 
 Another example would be running npm install inside of wp-content for all new sites.
-Make a file named post_site_creation_finished - this file gets 4 variables passed in, the hook name, the site name, the site domain, and the name of the site folder
+
+Make a file named post_site_creation_finished. This file gets 4 variables passed in: the hook name, the name of the site folder, the site domain, and the VVV path.
+
 ```bash
     #!/bin/bash
-    cd www/"$4"/htdocs/wp-content || exit
+    cd www/"$2"/htdocs/wp-content || exit
     npm install
 ```
 
-## Questions?
-
-Ping me on Twitter at [@bradparbs](http://twitter.com/bradparbs).
 
 ## Thanks
 
 Forked and based off of [vvv-site-wizard from Alison Barrett](https://github.com/aliso/vvv-site-wizard).
-Also thanks to [creativecoder](http://github.com/creativecoder), [jtsternberg](http://github.com/jtsternberg), [tnorthcutt](http://github.com/tnorthcutt), [joehills](http;//github.com/joehills), [gregrickaby](http://github.com/gregrickaby), [leogopal](http://github.com/leogopal), [Mte90](http://github.com/Mte90), [Octopixell](http://github.com/Octopixell), [wpsmith](https://github.com/wpsmith), [WPProdigy](https://github.com/WPprodigy), [caseypatrickdriscoll](http://github.com/caseypatrickdriscoll), [michaelbeil](http://github.com/michaelbeil), [wesbos](http://github.com/wesbos) for awesome contributions.
+Also thanks to [meitar](https://github.com/meitar), [creativecoder](https://github.com/creativecoder), [jtsternberg](https://github.com/jtsternberg), [caseypatrickdriscoll](https://github.com/caseypatrickdriscoll), [gregrickaby](https://github.com/gregrickaby), [leogopal](https://github.com/leogopal), [ajdruff](https://github.com/ajdruff), [schlessera](https://github.com/schlessera), [john-g-g](https://github.com/john-g-g), [tnorthcutt](https://github.com/tnorthcutt), [wpsmith](https://github.com/wpsmith), [wesbos](https://github.com/wesbos), [protechig](https://github.com/protechig), [Ipstenu](https://github.com/Ipstenu), [justintucker](https://github.com/justintucker), [michaelbeil](https://github.com/michaelbeil), [jb510](https://github.com/jb510), [neilgee](https://github.com/neilgee), [nanomoffet](https://github.com/nanomoffet), [joehills](https://github.com/joehills), [JeffMatson](https://github.com/JeffMatson), [greatislander](https://github.com/greatislander), [pelmered](https://github.com/pelmered), [gMagicScott](https://github.com/gMagicScott), [alexschlueter](https://github.com/alexschlueter), [eriktdesign](https://github.com/eriktdesign), [WPprodigy](https://github.com/WPprodigy), [michaelryanmcneill](https://github.com/michaelryanmcneill), [boborchard](https://github.com/boborchard), [cryptelli](https://github.com/cryptelli), [lswilson](https://github.com/lswilson) for their contributions.
